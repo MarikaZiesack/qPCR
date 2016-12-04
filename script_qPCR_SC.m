@@ -1,6 +1,7 @@
 %script_qPCR_SC
 
 %Input: Results.csv and rawdata.xlsx
+%
 
 
 %Calculate cfus for standard curve and put into meanCFUs_corr
@@ -20,7 +21,7 @@ end
 
 
 %parse Cq values (1/Cq) and put into matrix stack (Cqs)
-rawCq = readtable('20161129_5plex_plate1.csv');
+rawCq = readtable('C:\Users\Wyss User\Dropbox\Uni\PhD\LAB\PROJECT_FILES\Consortium\Experiments\Consortium_2\20161129_5plex_plate6.csv');
 %Wells = rawCq(20:end,1);
 Cqs = {zeros(8,12); zeros(8,12); zeros(8,12); zeros(8,12); zeros(8,12)}
 l = 1;
@@ -37,9 +38,12 @@ for k = 20:96:length(table2array(rawCq(20:end,6)))
 end
 
 
+
+CFUs = {zeros(8,12); zeros(8,12); zeros(8,12); zeros(8,12); zeros(8,12)}
+for i = 1:length(Cqs)
 %generate standard curve for Ec alone at this point
-EcCFU = log10(meanCFUs_corr(1:6,1));
-EcCqs_standard = mean(Cqs{1}(1:6,1:3),2);
+EcCFU = log10(meanCFUs_corr(1:5,1));
+EcCqs_standard = mean(Cqs{i}(1:5,1:3),2);
 p = polyfit(EcCFU, EcCqs_standard, 1);
 curve = p(1)*EcCFU+p(2)
 figure;
@@ -47,7 +51,9 @@ plot(EcCFU, EcCqs_standard, '.');
 hold on;
 plot(EcCFU, curve, '-')
 
+CFUs{i} = 10.^((Cqs{i}-p(2))./p(1));
 
-%continue with: calculate cfu values as cfu = (Cqs - p(2))/p(1) and plot as
-%line (growth curve)
+end
 
+
+save('plate6.mat', 'CFUs');
